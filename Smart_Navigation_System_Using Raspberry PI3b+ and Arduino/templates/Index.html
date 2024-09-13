@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Latest Data Display</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        #alert {
+            display: none;
+            border: 1px solid red;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Latest Data from project_data</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Distance 1</th>
+                <th>Distance 2</th>
+                <th>Distance 3</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if data %}
+            <tr>
+                <td>{{ data[0] }}</td>
+                <td>{{ data[1] }}</td>
+                <td>{{ data[2] }}</td>
+                <td>{{ data[3] }}</td>
+                <td>{{ data[4] }}</td>
+                <td>{{ data[5] }}</td>
+                <td>{{ data[6] }}</td>
+                <td>{{ data[7] }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8">No data available</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+        
+    <h2>GPS Data</h2>
+    <div id="map"></div>
+
+    <button id="allDataButton">View All Data</button>
+    <div id="alert">
+        <p><strong>Warning!</strong> All three ultrasonic sensors have detected a distance of less than 50 cm.</p>
+        <p>Phone Number: <strong>076 811 8858</strong></p>
+        <p>Start Voice Recordings (SMS): 555 </p>
+        <p>Voice Control (SMS): 666 </p>
+        <p>Get GPS Location (SMS): 777 </p>
+        <p>Check Status (SMS): 888 </p>
+        <p>Delete the content of the Memory Card (SMS): 445</p>
+        <p>Shut Down (SMS): 444 </p>
+        <p><strong>INSTRUCTIONS</strong></p>
+        <p></p>
+        <p>1. Ensure the area is clear.</p> 
+        <p>2. Check sensor alignment.</p>
+        <p>3. Contact maintenance if issue persists.</p>
+    </div>
+
+    <script>
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        var marker;
+
+        function updateMap() {
+            var gpsData = {{ gps_data | tojson }};
+            if (gpsData.length > 0) {
+                var lat = gpsData[0][0];
+                var lon = gpsData[0][1];
+                var timestamp = gpsData[0][2];
+                var location = [parseFloat(lat), parseFloat(lon)];
+                map.setView(location, 15);
+
+                if (marker) {
+                    marker.setLatLng(location);
+                } else {
+                    marker = L.marker(location).addTo(map)
+                        .bindPopup("Timestamp: " + timestamp);
+                }
+            }
+        }
+
+        setInterval(() => {
+            location.reload();
+        }, 5000); // Refresh page every 5 seconds
+
+        window.onload = updateMap;
+
+        document.getElementById('allDataButton').onclick = function() {
+            window.location.href = "{{ url_for('all_data') }}";
+        };
+
+        // Show alert div if all distances are less than 50 cm
+        var distances = [{{ data[2] }}, {{ data[3] }}, {{ data[4] }}];
+        if (distances.every(d => d < 50)) {
+            document.getElementById('alert').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
