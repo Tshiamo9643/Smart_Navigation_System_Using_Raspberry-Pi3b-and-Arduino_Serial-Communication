@@ -1,0 +1,2 @@
+# Smart_Navigation_System_Using_Raspberry-Pi3b-and-Arduino_Serial-Communication
+Smart Blind Navigation System uses 3 ultrasonic sensors that are used calculate the distance between the blind person and the obstacle, if it reaches a certain distance, it activates buzzer and sends encoded gps signal from the arduino microcontroller through to the raspberry pi3b+ then to the website and e-mail is sent to admin.        
